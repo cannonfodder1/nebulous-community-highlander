@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31702.278
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HighlanderExample", "HighlanderExample.csproj", "{D696669E-D0B6-4CD3-AE60-C691084B460E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D696669E-D0B6-4CD3-AE60-C691084B460E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D696669E-D0B6-4CD3-AE60-C691084B460E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D696669E-D0B6-4CD3-AE60-C691084B460E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D696669E-D0B6-4CD3-AE60-C691084B460E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D89DBD10-CB09-411F-9F13-CB65D7061165}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,6 @@
+
+*.lnk
+CommunityHighlander/bin*
+CommunityHighlander/obj*
+HighlanderExample/bin/*
+HighlanderExample/obj/*
