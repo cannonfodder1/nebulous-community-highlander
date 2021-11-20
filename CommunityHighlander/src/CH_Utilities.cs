@@ -74,7 +74,7 @@ namespace CommunityHighlander
 			Type type = component.GetType();
 			if (prefab.GetComponent(type) == null)
 			{
-				CopyAllScriptValues(prefab.AddComponent(type), component);
+				CopyAllScriptValues(type, prefab.AddComponent(type), component);
 			}
 			else
 			{
@@ -82,44 +82,47 @@ namespace CommunityHighlander
 			}
 		}
 
-		public static Component CopyAllScriptValues(Component acceptor, Component donator, Dictionary<string, object> specifiedFields = null)
+		public static void CopyAllScriptValues(Type type, UnityEngine.Object acceptor, UnityEngine.Object donator, Dictionary<string, object> specifiedFields = null, List<string> exemptFields = null)
 		{
-			Type type = donator.GetType();
 			FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-			if (specifiedFields != null)
+			if (Plugin.logOperations) Debug.Log($"Copying all {fields.Length} fields from {donator.GetType()}");
+
+			if (specifiedFields != null && specifiedFields.Count > 0)
 			{
-				if (Plugin.logOperations) Debug.Log($"Copying all {fields.Length} fields from {donator.GetType()} with {specifiedFields.Count} specified");
+				if (Plugin.logOperations) Debug.Log($" with {specifiedFields.Count} specified");
 			}
-			else
+
+			if (exemptFields != null && exemptFields.Count > 0)
 			{
-				if (Plugin.logOperations) Debug.Log($"Copying all {fields.Length} fields from {donator.GetType()}");
+				if (Plugin.logOperations) Debug.Log($" with {exemptFields.Count} exempt");
 			}
 
 			foreach (FieldInfo field in fields)
 			{
-				if (specifiedFields != null)
+				if (exemptFields != null && exemptFields.Count > 0 && exemptFields.Contains(field.Name))
 				{
-					specifiedFields.TryGetValue(field.Name, out object value);
-
-					if (Plugin.logOperations) Debug.Log($"Attempting to set value {value}");
-
-					if (value != null)
-					{
-						if (Plugin.logOperations) Debug.Log($"Setting {field.Name} with value {value}");
-						field.SetValue(acceptor, value);
-						continue;
-					}
+					exemptFields.Remove(field.Name);
+					continue;
 				}
 
 				if (Plugin.logOperations) Debug.Log($"Copying {field.Name} with value {field.GetValue(donator)}");
+
 				field.SetValue(acceptor, field.GetValue(donator));
 			}
 
-			return acceptor;
+			if (specifiedFields != null && specifiedFields.Count > 0)
+			{
+				CopySpecificScriptValues(acceptor.GetType(), acceptor, specifiedFields, false);
+			}
+
+			if (type.BaseType != null)
+            {
+				CopyAllScriptValues(type.BaseType, acceptor, donator, specifiedFields, exemptFields);
+            }
 		}
 
-		public static void CopySpecificScriptValues(Type type, Component acceptor, Dictionary<string, object> fieldsToCopy, bool typeRecursion = false)
+		public static void CopySpecificScriptValues(Type type, UnityEngine.Object acceptor, Dictionary<string, object> fieldsToCopy, bool typeRecursion = false)
 		{
 			if (!type.IsAssignableFrom(acceptor.GetType()))
 			{
@@ -128,7 +131,7 @@ namespace CommunityHighlander
 
 			FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-			if (Plugin.logOperations) Debug.Log($"Searching {fieldsToCopy.Count} fields in {type}");
+			if (Plugin.logOperations) Debug.Log($"Copying {fieldsToCopy.Count} fields in {type}");
 
 			foreach (FieldInfo field in fields)
 			{
@@ -185,6 +188,37 @@ namespace CommunityHighlander
 			}
 
 			return isLOD || hasLOD;
+		}
+
+		public static void PrintAllScriptValues(Type type, UnityEngine.Object obj)
+		{
+			FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+			Debug.Log($"Printing out {fields.Length} fields of {type.Name}");
+
+			foreach (FieldInfo field in fields)
+			{
+				object value = field.GetValue(obj);
+
+				if (value is not null)
+				{
+					Debug.Log($"   {field.Name} = {value}");
+				}
+                else
+				{
+					Debug.Log($"   {field.Name} = NULL");
+				}
+			}
+
+			if (type.BaseType != null)
+			{
+				PrintAllScriptValues(type.BaseType, obj);
+			}
+
+			if (type == obj.GetType())
+			{
+				Debug.Log($"--- PRINTING COMPLETE ---");
+			}
 		}
 	}
 }

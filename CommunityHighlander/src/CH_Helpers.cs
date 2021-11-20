@@ -4,7 +4,9 @@ using System.Collections.Generic;
 
 using UnityEngine;
 using Modding;
+using Munitions;
 using Ships;
+using Utility;
 
 namespace CommunityHighlander
 {
@@ -65,24 +67,159 @@ namespace CommunityHighlander
 			CH_BundleManager.Instance.AddHullComponent(saveToPath, mainScript);
 		}
 
+		public static ScriptableObject CreateNebulousAmmoType(
+			ModRecord modRecord,
+			string ammoName,
+			string saveToPath,
+			string copyFromPath,
+			Dictionary<String, object> valueChanges)
+		{
+			if (CH_BundleManager.Instance.GetMunition(saveToPath) != null) return null;
+
+			ScriptableObject createdObject = CopyNebulousAmmoType(ammoName, copyFromPath);
+
+			FinalizeNebulousAmmoType(modRecord, ammoName, saveToPath, createdObject, valueChanges);
+
+			return createdObject;
+		}
+
+		private static ScriptableObject CopyNebulousAmmoType(string ammoName, string copyFromPath)
+		{
+			ScriptableObject donatorObject = (ScriptableObject)CH_BundleManager.Instance.GetMunition(copyFromPath);
+			ScriptableObject acceptorObject = ScriptableObject.CreateInstance(donatorObject.GetType());
+
+			List<string> exemptFields = new();
+			exemptFields.Add("__parsedKey");
+			exemptFields.Add("_munitionKey");
+			exemptFields.Add("m_CachedPtr");
+
+			CH_Utilities.CopyAllScriptValues(acceptorObject.GetType(), acceptorObject, donatorObject, null, exemptFields);
+
+			UnityEngine.Object.DontDestroyOnLoad(acceptorObject);
+			acceptorObject.name = ammoName;
+
+			return acceptorObject;
+		}
+
+		private static void FinalizeNebulousAmmoType(
+			ModRecord modRecord,
+			string ammoName,
+			string saveToPath,
+			ScriptableObject createdObject,
+			Dictionary<String, object> valueChanges)
+		{
+			valueChanges.TryGetValue("CH_ChangeGradient", out object colourKeys);
+			if (colourKeys != null)
+			{
+				EditMunitionGradient(createdObject, (GradientColorKey[])colourKeys);
+				valueChanges.Remove("CH_ChangeGradient");
+			}
+
+			valueChanges.Add("_modId", modRecord.Info.UniqueIdentifier);
+			valueChanges.Add("_saveKey", saveToPath);
+			valueChanges.Add("_munitionName", ammoName);
+
+			CH_Utilities.CopySpecificScriptValues(createdObject.GetType(), createdObject, valueChanges, true);
+
+			CH_BundleManager.Instance.AddMunition(saveToPath, (IMunition)createdObject);
+		}
+
+		private static void CopyMunitionGradient(LightweightKineticShell target, LightweightKineticShell source)
+		{
+			StandbyVisualEffect visualEffect = source.TracerEffect;
+			FieldInfo effectField = typeof(LightweightKineticShell).GetField("_tracerEffect", BindingFlags.NonPublic | BindingFlags.Instance);
+			effectField.SetValue(target, visualEffect);
+		}
+
+		private static void EditMunitionGradient(ScriptableObject munition, GradientColorKey[] colourKeys)
+		{
+			LightweightKineticShell munitionScript = (LightweightKineticShell)munition;
+
+			if (munitionScript is null) return;
+
+			StandbyVisualEffect visualEffect = munitionScript.TracerEffect;
+			ValueType wrapperObject = visualEffect;
+
+			Type type = visualEffect.GetType();
+			FieldInfo gradientField = type.GetField("_gradients", BindingFlags.NonPublic | BindingFlags.Instance);
+
+			StandbyVisualEffect.GradientProperty[] gradients = (StandbyVisualEffect.GradientProperty[])gradientField.GetValue(wrapperObject);
+
+			if (gradients.Length < 1) return;
+
+			Gradient gradient = new()
+			{
+				colorKeys = colourKeys,
+				alphaKeys = gradients[0].Value.alphaKeys,
+				mode = gradients[0].Value.mode
+			};
+			
+			StandbyVisualEffect.GradientProperty property = new()
+			{
+				Name = gradients[0].Name,
+				Value = gradient
+			};
+
+			gradientField.SetValue(wrapperObject, new StandbyVisualEffect.GradientProperty[] { property });
+			visualEffect = (StandbyVisualEffect)wrapperObject;
+
+			FieldInfo effectField = typeof(LightweightKineticShell).GetField("_tracerEffect", BindingFlags.NonPublic | BindingFlags.Instance);
+			effectField.SetValue(munition, visualEffect);
+		}
+
+		private static void PrintMunitionGradient(ScriptableObject munition)
+		{
+			LightweightKineticShell munitionScript = (LightweightKineticShell)munition;
+
+			StandbyVisualEffect visualEffect = munitionScript.TracerEffect;
+			ValueType wrapperObject = visualEffect;
+
+			Type type = visualEffect.GetType();
+			FieldInfo gradientField = type.GetField("_gradients", BindingFlags.NonPublic | BindingFlags.Instance);
+
+			StandbyVisualEffect.GradientProperty[] gradients = (StandbyVisualEffect.GradientProperty[])gradientField.GetValue(wrapperObject);
+
+			if (gradients != null)
+			{
+				Debug.Log($"{gradients.Length} Gradients:");
+				foreach (StandbyVisualEffect.GradientProperty gradient in gradients)
+				{
+					Debug.Log($" - {gradient.Name}");
+
+					foreach (GradientColorKey key in gradient.Value.colorKeys)
+					{
+						Debug.Log($"    - {key.color} : {key.time}");
+					}
+				}
+			}
+		}
+
 		public static ResourceModifier CreateNebulousResourceModifier(string resourceName, int resourceAmount, bool perCubicMeter = false)
         {
 			ResourceModifier resource = new();
-			ValueType workaround = resource;
 
-			Type type = resource.GetType();
+			Dictionary<string, object> values = new();
+			values.Add("_resourceName", resourceName);
+			values.Add("_amount", resourceAmount);
+			values.Add("_perUnit", perCubicMeter);
 
-			FieldInfo nameField = type.GetField("_resourceName", BindingFlags.NonPublic | BindingFlags.Instance);
-			FieldInfo amountField = type.GetField("_amount", BindingFlags.NonPublic | BindingFlags.Instance);
-			FieldInfo unitField = type.GetField("_perUnit", BindingFlags.NonPublic | BindingFlags.Instance);
-
-			nameField.SetValue(workaround, resourceName);
-			amountField.SetValue(workaround, resourceAmount);
-			unitField.SetValue(workaround, perCubicMeter);
-
-			resource = (ResourceModifier)workaround;
+			resource = (ResourceModifier)EditStructFields(resource, values);
 
 			return resource;
+		}
+
+		public static ValueType EditStructFields(object structure, Dictionary<string, object> values)
+		{
+			ValueType workaround = (ValueType)structure;
+			Type type = structure.GetType();
+
+			foreach (KeyValuePair<string, object> value in values)
+			{
+				FieldInfo field = type.GetField(value.Key, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+				field.SetValue(workaround, value.Value);
+			}
+
+			return workaround;
 		}
 	}
 }

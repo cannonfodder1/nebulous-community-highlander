@@ -30,12 +30,22 @@ namespace CommunityHighlander
 			_components.Add(key, component);
 		}
 
+		public void AddMunition(string key, IMunition munition)
+		{
+			_munitions.Add(key, munition);
+		}
+
 		public void HideItem(string key)
 		{
 			if (!IsItemHidden(key))
 			{
 				_hidden.Add(key);
 			}
+		}
+
+		public bool IsItemHidden(string key)
+		{
+			return _hidden.Contains(key);
 		}
 
 
