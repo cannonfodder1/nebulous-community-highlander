@@ -10,6 +10,7 @@ using Bundles;
 using Modding;
 using UI;
 using Ships;
+using FleetEditor;
 
 namespace CommunityHighlander
 {
@@ -159,6 +160,22 @@ namespace CommunityHighlander
     /////////////////////
     /// OTHER PATCHES ///
     /////////////////////
+
+    [HarmonyPatch(typeof(ComponentPalette), "CreateItem")]
+    class Patch_CreateItem
+    {
+        static bool Prefix(ref HullComponent component)
+        {
+            if (component != null)
+            {
+                return !CH_BundleManager.Instance.IsItemHidden(component.SaveKey);
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
 
     [HarmonyPatch(typeof(HullComponent), "SocketSet")]
     class Patch_SocketSet

@@ -18,6 +18,9 @@ namespace CommunityHighlander
 {
     public class CH_BundleManager : BundleManager
 	{
+		private static CH_BundleManager _instance = null;
+		private List<string> _hidden = new();
+
 		///////////////////////
 		/// ALL-NEW METHODS ///
 		///////////////////////
@@ -27,13 +30,19 @@ namespace CommunityHighlander
 			_components.Add(key, component);
 		}
 
+		public void HideItem(string key)
+		{
+			if (!IsItemHidden(key))
+			{
+				_hidden.Add(key);
+			}
+		}
+
 
 
 		////////////////////////
 		/// MODIFIED METHODS ///
 		////////////////////////
-
-		private static CH_BundleManager _instance = null;
 
 		public CH_BundleManager()
 		{

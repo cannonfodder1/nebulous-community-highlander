@@ -4,3 +4,6 @@ CommunityHighlander/bin*
 CommunityHighlander/obj*
 HighlanderExample/bin/*
 HighlanderExample/obj/*
+CommunityHighlander/.vs/CommunityHighlander/DesignTimeBuild/.dtbcache.v2
+CommunityHighlander/.vs/CommunityHighlander/v16/.suo
+HighlanderExample/.vs/HighlanderExample/v16/.suo
