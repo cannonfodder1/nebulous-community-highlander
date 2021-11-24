@@ -19,7 +19,7 @@ namespace CommunityHighlander
     public class CH_BundleManager : BundleManager
 	{
 		private static CH_BundleManager _instance = null;
-		private List<string> _hidden = new();
+		private Dictionary<string, ModRecord> _hidden = new();
 
 		///////////////////////
 		/// ALL-NEW METHODS ///
@@ -35,17 +35,23 @@ namespace CommunityHighlander
 			_munitions.Add(key, munition);
 		}
 
-		public void HideItem(string key)
+		public void HideItem(string key, ModRecord mod)
 		{
 			if (!IsItemHidden(key))
 			{
-				_hidden.Add(key);
+				_hidden.Add(key, mod);
 			}
 		}
 
 		public bool IsItemHidden(string key)
 		{
-			return _hidden.Contains(key);
+			return _hidden.ContainsKey(key);
+		}
+
+		public ModRecord GetHiddenByMod(string key)
+		{
+			_hidden.TryGetValue(key, out ModRecord mod);
+			return mod;
 		}
 
 

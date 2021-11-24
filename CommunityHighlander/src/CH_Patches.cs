@@ -190,6 +190,23 @@ namespace CommunityHighlander
         }
     }
 
+    [HarmonyPatch(typeof(HullComponent), "GetDesignWarnings")]
+    class Patch_GetDesignWarnings
+    {
+        static bool Prefix(ref HullComponent __instance, ref List<string> warnings)
+        {
+            if (CH_BundleManager.Instance.IsItemHidden(__instance.SaveKey))
+            {
+                ModRecord mod = CH_BundleManager.Instance.GetHiddenByMod(__instance.SaveKey);
+                warnings.Add(
+                    "'" + __instance.ComponentName + "' has been hidden from the fleet editor " +
+                    "by the mod '" + mod.Info.ModName + "'");
+            }
+
+            return true;
+        }
+    }
+
     [HarmonyPatch(typeof(ModalModManager), "ApplyActiveMods")]
     class Patch_ApplyActiveMods
     {
