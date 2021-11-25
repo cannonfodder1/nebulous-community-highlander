@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using UnityEngine;
+using TMPro;
 
 using System;
 using System.Linq;
@@ -160,6 +161,18 @@ namespace CommunityHighlander
     /////////////////////
     /// OTHER PATCHES ///
     /////////////////////
+
+    [HarmonyPatch(typeof(VersionText), "Awake")]
+    class Patch_VersionText
+    {
+        static bool Prefix(ref VersionText __instance)
+        {
+            TextMeshProUGUI text = __instance.GetComponent<TextMeshProUGUI>();
+            text.text = "Version " + Application.version + "\n" + "Highlander " + PluginInfo.PLUGIN_VERSION;
+
+            return false;
+        }
+    }
 
     [HarmonyPatch(typeof(ComponentPalette), "CreateItem")]
     class Patch_CreateItem
