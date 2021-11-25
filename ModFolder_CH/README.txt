@@ -3,9 +3,6 @@
 Game folder: usually `C:/Program Files (x86)/Steam/steamapps/common/Nebulous` unless you installed Steam somewhere else.
 Workshop folder: this text file you're reading is inside it.
 
-To check if the Highlander is properly installed, try adding or removing mods using the in-game mod manager.
-If the highlander is working, the game will say it is EXITING, instead of RESTARTING.
-
 ### Installation Instructions
 
 1. Copy the "BepInEx_x64_5.4.16.0.zip" file in the workshop folder (see above).
@@ -20,6 +17,6 @@ If the highlander is working, the game will say it is EXITING, instead of RESTAR
 ### Update Instructions
 
 1. Make sure Steam's downloaded the new update. You can force the download by starting up Nebulous.
-2. Grab the new `CommunityHighlander.dll` file from the workshop folder.
-3. Copy-paste it into your `Nebulous/BepInEx/plugins` folder. All done!
+2. Grab the new `CommunityHighlander.dll` file from the workshop folder. You can right-click -> Properties -> Details if you want to check its version number.
+3. Copy-paste it into your `Nebulous/BepInEx/plugins` folder. All done! The highlander version number on the main menu should be updated.
 

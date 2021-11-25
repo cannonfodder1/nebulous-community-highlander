@@ -14,12 +14,8 @@ The NCH is fully integrated with the game's modding framework that ensures modde
 
 If no mods that require the highlander are currently enabled, your Nebulous game experience will be entirely unchanged.
 
-## How
+## Where
 
-1. Download BepInEx from the "Assets" list here (when in doubt pick the x64 version): https://github.com/BepInEx/BepInEx/releases
-2. Install BepInEx by unzipping it inside your game folder. The structure should be `steamapps/common/Nebulous/BepInEx/core`.
-3. Run the game to the main menu, then quit. More folders should have appeared inside `Nebulous/BepInEx`.
-4. Download the latest version of the Highlander from here: https://github.com/cannonfodder1/nebulous-community-highlander/releases
-5. Place `CommunityHighlander.dll` inside `Nebulous/BepInEx/plugins`. All done!
+Please note that the Nebulous workshop is currently private, so you'll need to be logged into a Steam account that owns the game.
 
-The example mod, containing the Mk67 Autocannon and Mk601 Small Beam Turret, is available on the Steam Workshop. Please note that the Nebulous workshop is currently private, so you'll need to be logged into a Steam account that owns the game. Grab it here: https://steamcommunity.com/sharedfiles/filedetails/?id=2647917560
+https://steamcommunity.com/sharedfiles/filedetails/?id=2663519024
