@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <ModInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ModName>Community Highlander</ModName>
-  <ModDescription>This meta-mod allows other mods to do more cool stuff to your game. Requires a quick manual installation process. Go to "C:\Program Files (x86)\Steam\steamapps\workshop\content\887570\FOLDER" and check README.txt for instructions.</ModDescription>
+  <ModDescription>This meta-mod allows other mods to do more cool stuff to your game. Requires a quick manual installation process. Go to "C:\Program Files (x86)\Steam\steamapps\workshop\content\887570\2663519024" and check README.txt for instructions.</ModDescription>
   <ModVer>1.1.0</ModVer>
-  <GameVer>0.0.19</GameVer>
   <PreviewImage>C:\Program Files (x86)\Steam\steamapps\common\Nebulous\Mods\CommunityHighlander\preview.png</PreviewImage>
+  <GameVer>0.0.19</GameVer>
 </ModInfo>

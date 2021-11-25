@@ -1,7 +1,9 @@
 # Nebulous Community Highlander
 
-Game folder: usually `C:/Program Files (x86)/Steam/steamapps/common/Nebulous` unless you installed Steam somewhere else.
-Workshop folder: this text file you're reading is inside it.
+If you are on Mac or Linux or you installed Steam in a non-default location, the below paths are likely incorrect.
+
+Game folder: `C:\Program Files (x86)\Steam\steamapps\common\Nebulous`
+Workshop folder: `C:\Program Files (x86)\Steam\steamapps\workshop\content\887570\2663519024`
 
 ### Installation Instructions
 
