@@ -168,7 +168,7 @@ namespace CommunityHighlander
         static bool Prefix(ref VersionText __instance)
         {
             TextMeshProUGUI text = __instance.GetComponent<TextMeshProUGUI>();
-            text.text = "Version " + Application.version + "\n" + "Highlander " + PluginInfo.PLUGIN_VERSION;
+            text.text = "Version " + Application.version + "\n" + "Highlander " + CH_Utilities.GetHighlanderVersion();
 
             return false;
         }
@@ -253,10 +253,16 @@ namespace CommunityHighlander
     {
         public static bool Prefix(ref BundleManager.ModLoadReport report)
         {
+            List<ulong> modIDs = new();
+
             foreach (ModRecord modRecord in report.Loaded)
             {
-                CH_Utilities.ActivateHighlanderEventHook(modRecord, "OnModLoadedAtStartup", Plugin.logEventHooks);
+                CH_EventHookManager.Instance.RegisterEventHook(modRecord, Plugin.logEventHooks);
+
+                modIDs.Add(modRecord.Info.UniqueIdentifier);
             }
+
+            CH_EventHookManager.Instance.TriggerEvent("OnModLoadedAtStartup", modIDs, Plugin.logEventHooks);
 
             return true;
         }
@@ -272,12 +278,18 @@ namespace CommunityHighlander
         {
             if (____downloadCoroutine == null && ____missingMods.Count == 0 && ____neededMods.Length > 0)
             {
+                List<ulong> modIDs = new();
+
                 foreach (ulong modID in ____neededMods)
                 {
                     ModRecord modRecord = ModDatabase.Instance.GetModByID(modID);
 
-                    CH_Utilities.ActivateHighlanderEventHook(modRecord, "OnModLoadedInLobby", Plugin.logEventHooks);
+                    CH_EventHookManager.Instance.RegisterEventHook(modRecord, Plugin.logEventHooks);
+
+                    modIDs.Add(modID);
                 }
+
+                CH_EventHookManager.Instance.TriggerEvent("OnModLoadedInLobby", modIDs, Plugin.logEventHooks);
             }
 
             return true;

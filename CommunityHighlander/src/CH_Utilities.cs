@@ -1,46 +1,15 @@
 ﻿using System;
 using System.Reflection;
 using System.Collections.Generic;
-
 using UnityEngine;
-using Modding;
 
 namespace CommunityHighlander
 {
     internal class CH_Utilities
 	{
-		public static void ActivateHighlanderEventHook(ModRecord modRecord, string eventHookName, bool log = false)
-		{
-			Type modType = modRecord.GetType();
-			FieldInfo field = modType.GetField("_loadedAssemblies", BindingFlags.Instance | BindingFlags.NonPublic);
-			List<Assembly> assemblies = (List<Assembly>)field.GetValue(modRecord);
-
-			if (log) Debug.Log($"Activating {eventHookName}...");
-			if (log) Debug.Log($"Mod {modRecord.Info.ModName} Assemblies:");
-			foreach (Assembly assembly in assemblies)
-			{
-				if (log) Debug.Log($"- {assembly.GetName().Name}");
-				foreach (Type assemblyType in assembly.GetTypes())
-				{
-					if (assemblyType.BaseType == typeof(CH_EventHookTemplate))
-					{
-						if (log) Debug.Log($"--- {assemblyType.Name} inherits from CH_EventHookTemplate");
-						CH_EventHookTemplate eventHook = (CH_EventHookTemplate)Activator.CreateInstance(assemblyType, new object[] { modRecord });
-
-						if (eventHook != null)
-						{
-							if (log) Debug.Log($"--- {assemblyType.Name} instantiated");
-							MethodInfo eventHookMethod = assemblyType.GetMethod(eventHookName, BindingFlags.Instance | BindingFlags.Public);
-
-							if (eventHookMethod != null)
-							{
-								if (log) Debug.Log($"--- {assemblyType.Name} activated");
-								eventHookMethod.Invoke(eventHook, new object[] { });
-							}
-						}
-					}
-				}
-			}
+		public static string GetHighlanderVersion()
+        {
+			return PluginInfo.PLUGIN_VERSION;
 		}
 
 		public static void CopyPrefabRecursive(ref GameObject acceptor, ref GameObject donator, GameObject parent = null)

@@ -5,11 +5,15 @@ namespace CommunityHighlander
 {
     public class CH_EventHookTemplate
     {
+        private const string constructorError = "Event hooks cannot be instantiated without a mod record!";
+        private const string getVersionError = "Version getters should only be called in classes that inherit from the template!";
+        private const string eventMethodError = "Event methods should only be called in classes that inherit from the template!";
+
         protected ModRecord modRecord;
 
         public CH_EventHookTemplate()
         {
-            throw new NotImplementedException("CH_EventHookTemplate should never be instantiated without a mod record!");
+            throw new InvalidOperationException(constructorError);
         }
 
         public CH_EventHookTemplate(ModRecord modRecord)
@@ -17,14 +21,30 @@ namespace CommunityHighlander
             this.modRecord = modRecord;
         }
 
+        public virtual string HighlanderVersionMinimum
+        {
+            get
+            {
+                throw new NotImplementedException(getVersionError);
+            }
+        }
+
+        public virtual string HighlanderVersionMaximum
+        {
+            get
+            {
+                throw new NotImplementedException(getVersionError);
+            }
+        }
+
         public virtual void OnModLoadedAtStartup()
         {
-            throw new NotImplementedException("OnModLoadedAtStartup event hook should only be called in classes that inherit from the template!");
+            throw new NotImplementedException(eventMethodError);
         }
 
         public virtual void OnModLoadedInLobby()
         {
-            throw new NotImplementedException("OnModLoadedInLobby event hook should only be called in classes that inherit from the template!");
+            throw new NotImplementedException(eventMethodError);
         }
     }
 }
