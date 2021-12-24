@@ -12,6 +12,20 @@ namespace CommunityHighlander
 			return PluginInfo.PLUGIN_VERSION;
 		}
 
+		public static object GetPrivateValue(object instance, string fieldName)
+        {
+			Type type = instance.GetType();
+			FieldInfo field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+			return field.GetValue(instance);
+		}
+		
+		public static void SetPrivateValue(object instance, string fieldName, object value)
+        {
+			Type type = instance.GetType();
+			FieldInfo field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+			field.SetValue(instance, value);
+		}
+
 		public static void CopyPrefabRecursive(ref GameObject acceptor, ref GameObject donator, GameObject parent = null)
 		{
 			if (parent != null) acceptor.transform.parent = parent.transform;

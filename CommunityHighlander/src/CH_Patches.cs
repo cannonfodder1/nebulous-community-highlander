@@ -227,13 +227,10 @@ namespace CommunityHighlander
         {
             Type type = typeof(ModalModManager);
 
-            FieldInfo activeMods = type.GetField("_activeMods", BindingFlags.NonPublic | BindingFlags.Instance);
-            List<ModListItem> _activeMods = (List<ModListItem>)activeMods.GetValue(__instance);
+            List<ModListItem> _activeMods = (List<ModListItem>)CH_Utilities.GetPrivateValue(__instance, "_activeMods");
             ModDatabase.Instance.SetModsToLoad(_activeMods.ConvertAll<ModRecord>((ModListItem x) => x.Mod));
 
-            FieldInfo pendingChanges = type.GetField("_pendingChanges", BindingFlags.NonPublic | BindingFlags.Instance);
-            bool _pendingChanges = (bool)pendingChanges.GetValue(__instance);
-            _pendingChanges = false;
+            CH_Utilities.SetPrivateValue(__instance, "_pendingChanges", false);
 
             MethodInfo updateButtons = type.GetMethod("UpdateButtons", BindingFlags.NonPublic | BindingFlags.Instance);
             updateButtons.Invoke(__instance, new object[] { });
@@ -251,13 +248,14 @@ namespace CommunityHighlander
     [HarmonyPatch(typeof(MainMenu), "OnFinishedLoading")]
     class Patch_OnFinishedLoading
     {
-        public static bool Prefix(ref BundleManager.ModLoadReport report)
+        static bool Prefix(ref BundleManager.ModLoadReport report, ref List<CH_EventHookManager.HookRegisterReport> __state)
         {
+            __state = new();
             List<ulong> modIDs = new();
 
             foreach (ModRecord modRecord in report.Loaded)
             {
-                CH_EventHookManager.Instance.RegisterEventHook(modRecord, Plugin.logEventHooks);
+                __state.Add(CH_EventHookManager.Instance.RegisterEventHook(modRecord, Plugin.logEventHooks));
 
                 modIDs.Add(modRecord.Info.UniqueIdentifier);
             }
@@ -266,12 +264,29 @@ namespace CommunityHighlander
 
             return true;
         }
+
+        static void Postfix(ref List<CH_EventHookManager.HookRegisterReport> __state)
+        {
+            string current = CH_Utilities.GetHighlanderVersion();
+
+            foreach (CH_EventHookManager.HookRegisterReport report in __state)
+            {
+                ModalConfirm warning = MenuController.Instance.OpenMenu<ModalConfirm>("Confirm");
+                warning.Set(
+                    $"{report.modName} requires a highlander version between {report.minimum} and {report.maximum}.\n" +
+                    $"Your installed version is {current}.\n\n" +
+                    $"This mod may not work correctly or cause technical issues. Please install a valid highlander version.",
+                    "Understood",
+                    false, null, null
+                );
+            }
+        }
     }
 
     [HarmonyPatch(typeof(LobbyModPane), "UpdateActiveTab")]
     class Patch_UpdateActiveTab
     {
-        public static bool Prefix(
+        static bool Prefix(
             ref ulong[] ____neededMods,
             ref List<ulong> ____missingMods,
             ref Coroutine ____downloadCoroutine)

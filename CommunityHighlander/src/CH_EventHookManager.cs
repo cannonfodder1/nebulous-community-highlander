@@ -3,13 +3,41 @@ using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
 using Modding;
-using System.Runtime.Remoting;
 
 namespace CommunityHighlander
 {
     public class CH_EventHookManager
     {
-        private struct HighlanderVersion
+        public struct HookRegisterReport
+        {
+            public HookRegisterReport(int result)
+            {
+                this.result = result;
+                this.modName = String.Empty;
+                this.minimum = String.Empty;
+                this.maximum = String.Empty;
+            }
+
+            public HookRegisterReport(int result, string modName, string minimum, string maximum)
+            {
+                this.result = result;
+                this.modName = modName;
+                this.minimum = minimum;
+                this.maximum = maximum;
+            }
+
+            // -1 = version mismatch
+            //  0 = hook registered
+            //  1 = no hook found
+            //  2 = already exists
+            public int result;
+
+            public string modName;
+            public string minimum;
+            public string maximum;
+        }
+
+        public struct HighlanderVersion
         {
             public HighlanderVersion(string str)
             {
@@ -62,21 +90,28 @@ namespace CommunityHighlander
             }
         }
 
-        public void RegisterEventHook(ModRecord modRecord, bool log = false)
+        public HookRegisterReport RegisterEventHook(ModRecord modRecord, bool log = false)
         {
+            if (_eventHooks.ContainsKey(modRecord.Info.UniqueIdentifier))
+            {
+                if (log) Debug.Log($"Event hook from {modRecord.Info.ModName} already exists");
+
+                return new HookRegisterReport(2);
+            }
+
             string matchVersion = CH_Utilities.GetHighlanderVersion();
 
             Type modType = modRecord.GetType();
             FieldInfo modField = modType.GetField("_loadedAssemblies", BindingFlags.Instance | BindingFlags.NonPublic);
             List<Assembly> assemblies = (List<Assembly>)modField.GetValue(modRecord);
 
-            if (log) Debug.Log($"Registering event hooks from {modRecord.Info.ModName} for version {matchVersion}");
+            if (log) Debug.Log($"Searching for event hook from {modRecord.Info.ModName} for version {matchVersion}");
 
             foreach (Assembly assembly in assemblies)
             {
                 foreach (Type hookType in assembly.GetTypes())
                 {
-                    if (log) Debug.Log($"Checking if class {hookType.Name} is an event hook template");
+                    if (log) Debug.Log($"Searching for event hook in class {hookType.Name}");
 
                     if (hookType.BaseType == typeof(CH_EventHookTemplate))
                     {
@@ -91,21 +126,27 @@ namespace CommunityHighlander
                         HighlanderVersion hookMin = new(hookMinStr);
                         HighlanderVersion hookMax = new(hookMaxStr);
 
-                        if (hookMin.Get() <= version.Get() || version.Get() <= hookMax.Get())
+                        if (log) Debug.Log($"{hookMin.Get()} < {version.Get()} < {hookMax.Get()}");
+
+                        if (hookMin.Get() <= version.Get() && version.Get() <= hookMax.Get())
                         {
-                            if (!_eventHooks.ContainsKey(modRecord.Info.UniqueIdentifier))
-                            {
-                                _eventHooks.Add(modRecord.Info.UniqueIdentifier, eventHook);
-                                return;
-                            }
+                            _eventHooks.Add(modRecord.Info.UniqueIdentifier, eventHook);
+
+                            return new HookRegisterReport(0);
                         }
                         else
                         {
                             if (log) Debug.Log($"VERSION MISMATCHES {version.Get()}");
+
+                            _eventHooks.Add(modRecord.Info.UniqueIdentifier, eventHook);
+
+                            return new HookRegisterReport(-1, modRecord.Info.ModName, hookMinStr, hookMaxStr);
                         }
                     }
                 }
             }
+
+            return new HookRegisterReport(1);
         }
 
         public void TriggerEvent(string eventName, List<ulong> modIDs, bool log = false)
