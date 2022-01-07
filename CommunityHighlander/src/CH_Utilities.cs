@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Reflection;
 using System.Collections.Generic;
+
 using UnityEngine;
+using Utility;
 
 namespace CommunityHighlander
 {
@@ -10,6 +12,57 @@ namespace CommunityHighlander
 		public static string GetHighlanderVersion()
         {
 			return PluginInfo.PLUGIN_VERSION;
+		}
+
+		public static string FormatRemoteVersionTag(string playerName, string remoteVersion)
+		{
+			string finalText;
+			if (remoteVersion != null && remoteVersion.Length > 0)
+			{
+				if (remoteVersion == GetHighlanderVersion())
+				{
+					finalText = "<color=" + GameColors.GreenTextColor + ">[NCH v" + remoteVersion + "]</color> " + playerName;
+				}
+				else
+				{
+					finalText = "<color=" + GameColors.YellowTextColor + ">[NCH v" + remoteVersion + "]</color> " + playerName;
+				}
+			}
+			else
+			{
+				finalText = "[NCH v0.0.0] " + playerName;
+			}
+
+			return finalText;
+		}
+
+		public static string FormatLocalVersionTag(string playerName, string remoteVersion)
+		{
+			string finalText;
+			string localVersion = GetHighlanderVersion();
+
+			if (remoteVersion == localVersion)
+			{
+				finalText = "<color=" + GameColors.GreenTextColor + ">[NCH v" + localVersion + "]</color> " + playerName;
+			}
+			else
+			{
+				finalText = "<color=" + GameColors.YellowTextColor + ">[NCH v" + localVersion + "]</color> " + playerName;
+			}
+
+			return finalText;
+		}
+
+		public static string FormatMissingVersionTag(string playerName)
+		{
+			if (!playerName.Contains("[NCH v"))
+			{
+				return "<color=" + GameColors.RedTextColor + ">[NCH v0.0.0]</color> " + playerName;
+			}
+            else
+            {
+				return playerName;
+            }
 		}
 
 		public static object GetPrivateValue(object instance, string fieldName)
@@ -24,6 +77,35 @@ namespace CommunityHighlander
 			Type type = instance.GetType();
 			FieldInfo field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
 			field.SetValue(instance, value);
+		}
+
+		public static void CallPrivateMethod(object instance, string methodName, object[] parameters, bool baseClass = false)
+		{
+			Type type = instance.GetType();
+			if (baseClass) type = type.BaseType;
+
+			MethodInfo method = type.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+			method.Invoke(instance, parameters);
+		}
+
+		public static void ListPrivateMethods(object instance)
+		{
+			Type type = instance.GetType();
+			MethodInfo[] methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance);
+
+			Debug.Log("Methods of " + type.Name + ":");
+
+			foreach (MethodInfo method in methods)
+			{
+				Debug.Log(" - " + method.Name);
+			}
+		}
+
+		public static object GetPrivateProperty(object instance, string fieldName)
+		{
+			Type type = instance.GetType();
+			PropertyInfo property = type.GetProperty(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+			return property.GetValue(instance);
 		}
 
 		public static void CopyPrefabRecursive(ref GameObject acceptor, ref GameObject donator, GameObject parent = null)

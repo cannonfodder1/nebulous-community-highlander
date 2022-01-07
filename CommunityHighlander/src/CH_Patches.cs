@@ -1,17 +1,21 @@
-﻿using HarmonyLib;
-using UnityEngine;
-using TMPro;
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
+
+using HarmonyLib;
+using UnityEngine;
+using TMPro;
+using Steamworks;
+using Steamworks.Data;
 
 using Bundles;
 using Modding;
 using UI;
 using Ships;
 using FleetEditor;
+using Networking;
+using Game;
 
 namespace CommunityHighlander
 {
@@ -231,9 +235,7 @@ namespace CommunityHighlander
             ModDatabase.Instance.SetModsToLoad(_activeMods.ConvertAll<ModRecord>((ModListItem x) => x.Mod));
 
             CH_Utilities.SetPrivateValue(__instance, "_pendingChanges", false);
-
-            MethodInfo updateButtons = type.GetMethod("UpdateButtons", BindingFlags.NonPublic | BindingFlags.Instance);
-            updateButtons.Invoke(__instance, new object[] { });
+            CH_Utilities.CallPrivateMethod(__instance, "UpdateButtons", new object[] { });
 
             ModalConfirm warning = MenuController.Instance.OpenMenu<ModalConfirm>("Confirm");
             warning.Set("Changes to the active mod list have been applied.\nThe game will now exit.", "OK", false, delegate
@@ -308,6 +310,128 @@ namespace CommunityHighlander
             }
 
             return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(PortableNetworkManager), "SetLobbyName")]
+    class Patch_SetLobbyName
+    {
+        static void Postfix(ref PortableNetworkManager __instance)
+        {
+            Debug.Log("PortableNetworkManager::SetLobbyName CALLED");
+
+            if (__instance == null)
+            {
+                Debug.Log("Manager NULL");
+                return;
+            }
+
+            Lobby? hostedLobby = (Lobby?)CH_Utilities.GetPrivateValue(__instance, "_hostedLobby");
+            if (hostedLobby == null)
+            {
+                Debug.Log("Lobby NULL");
+                return;
+            }
+
+            hostedLobby.Value.SetData("NCH_host", CH_Utilities.GetHighlanderVersion());
+        }
+    }
+
+    [HarmonyPatch(typeof(MPMatchEntry), "Set")]
+    class Patch_Set
+    {
+        static void Postfix(ref MPMatchEntry __instance, ref SteamLobby lobby)
+        {
+            Debug.Log("MPMatchEntry::Set CALLED");
+
+            if (__instance == null)
+            {
+                Debug.Log("Match NULL");
+                return;
+            }
+
+            Lobby? lobbyData = (Lobby?)CH_Utilities.GetPrivateValue(lobby, "_lobby");
+            if (lobbyData == null)
+            {
+                Debug.Log("Lobby NULL");
+                return;
+            }
+
+            string version = lobbyData.Value.GetData("NCH_version");
+
+            Debug.Log($"{lobby.Name} version is {((version != null && version.Length > 0) ? version : "NULL")}");
+
+            TextMeshProUGUI matchName = (TextMeshProUGUI)CH_Utilities.GetPrivateValue(__instance, "_matchName");
+            matchName.text = "<b>" + CH_Utilities.FormatRemoteVersionTag(matchName.text, version) + "</b>";
+        }
+    }
+    
+    [HarmonyPatch(typeof(SkirmishLobbyMenu), "HandlePlayerAdded")]
+    class Patch_HandlePlayerAdded
+    {
+        static void Postfix(ref SkirmishLobbyMenu __instance, ref IPlayer player)
+        {
+            Debug.Log("SkirmishLobbyMenu::HandlePlayerAdded CALLED");
+
+            GameManager gameManager = GameManager.Instance;
+
+            if (player.PlayerName == "Joining Player..." || player.IsBot || gameManager.IsSoloGame) return;
+
+            PortableNetworkManager networkManager = (PortableNetworkManager)CH_Utilities.GetPrivateProperty(gameManager, "_netManager");
+            Lobby? lobby = (Lobby?)CH_Utilities.GetPrivateValue(networkManager.LobbyInfo, "_lobby");
+
+            if (lobby.Value.GetData("NCH_host").Length > 0)
+            {
+                List<SkirmishLobbyPlayerSlot> slots = (List<SkirmishLobbyPlayerSlot>)CH_Utilities.GetPrivateValue(__instance, "_slots");
+                SkirmishLobbyPlayerSlot slot = slots.Last();
+
+                string finalText = CH_Utilities.FormatMissingVersionTag(player.PlayerName);
+                slot.SetPlayerName(finalText);
+            }
+        }
+    }
+    
+    [HarmonyPatch(typeof(LobbyPlayer), "SyncPlayerNameChangedInternal")]
+    class Patch_SyncPlayerNameChangedInternal
+    {
+        static void Postfix(ref LobbyPlayer __instance, ref string oldName, ref string newName)
+        {
+            Debug.Log("LobbyPlayer::SyncPlayerNameChangedInternal CALLED");
+
+            GameManager gameManager = GameManager.Instance;
+
+            if (newName == "Joining Player..." || __instance.IsBot || gameManager.IsSoloGame) return;
+
+            PortableNetworkManager networkManager = (PortableNetworkManager)CH_Utilities.GetPrivateProperty(gameManager, "_netManager");
+            Lobby? lobby = (Lobby?)CH_Utilities.GetPrivateValue(networkManager.LobbyInfo, "_lobby");
+
+            if (lobby.Value.GetData("NCH_host").Length > 0)
+            {
+                string finalText = CH_Utilities.FormatMissingVersionTag(__instance.PlayerName);
+                CH_Utilities.CallPrivateMethod(__instance, "OnPlayerNameChanged", new object[] { finalText });
+            }
+        }
+    }
+    
+    [HarmonyPatch(typeof(SkirmishLobbyPlayer), "OnStartAuthority")]
+    class Patch_OnStartAuthority
+    {
+        static void Postfix(ref SkirmishLobbyPlayer __instance)
+        {
+            Debug.Log("LobbyPlayer::OnStartAuthority CALLED");
+
+            GameManager gameManager = GameManager.Instance;
+            if (__instance.IsBot || gameManager.IsSoloGame) return;
+
+            PortableNetworkManager networkManager = (PortableNetworkManager)CH_Utilities.GetPrivateProperty(gameManager, "_netManager");
+            Lobby? lobby = (Lobby?)CH_Utilities.GetPrivateValue(networkManager.LobbyInfo, "_lobby");
+            string lobbyVersion = lobby.Value.GetData("NCH_host");
+
+            if (lobbyVersion.Length > 0)
+            {
+                string finalText = CH_Utilities.FormatLocalVersionTag(SteamClient.Name, lobbyVersion);
+                CH_Utilities.CallPrivateMethod(__instance, "CmdSetPlayerName", new object[] { finalText }, true);
+            }
         }
     }
 }

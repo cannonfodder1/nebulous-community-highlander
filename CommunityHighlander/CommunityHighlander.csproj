@@ -22,16 +22,19 @@
   
   <ItemGroup>
     <Reference Include="Facepunch.Steamworks.Win64">
-      <HintPath>Facepunch.Steamworks.Win64.dll</HintPath>
+      <HintPath>lib\Facepunch.Steamworks.Win64.dll</HintPath>
+    </Reference>
+    <Reference Include="Mirror">
+      <HintPath>lib\Mirror.dll</HintPath>
     </Reference>
     <Reference Include="Nebulous">
-      <HintPath>Nebulous.dll</HintPath>
+      <HintPath>lib\Nebulous.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>lib\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="XNode">
-      <HintPath>XNode.dll</HintPath>
+      <HintPath>lib\XNode.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
