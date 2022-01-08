@@ -22,7 +22,7 @@ namespace CommunityHighlander.Patches
         static bool Prefix(ref VersionText __instance)
         {
             TextMeshProUGUI text = __instance.GetComponent<TextMeshProUGUI>();
-            text.text = "Version " + Application.version + "\n" + "NCH v" + Utilities.GetHighlanderVersion();
+            text.text = "Nebulous v" + Application.version + "\n" + "Highlander v" + Utilities.GetHighlanderVersion();
 
             return false;
         }
