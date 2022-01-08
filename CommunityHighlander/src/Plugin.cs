@@ -14,17 +14,17 @@ namespace CommunityHighlander
         public static bool logEventHooks = false;
         public static bool logOperations = false;
 
-        public static List<string> patchBlacklist;
+        public static List<string> redirectionBlacklist;
 
         private void Awake()
         {
             Logger.LogInfo($"Community Highlander version {PluginInfo.PLUGIN_VERSION} is loaded!");
-
-            patchBlacklist = new List<string>();
-            patchBlacklist.Add("get_Instance");
-            patchBlacklist.Add("get_IsInitialized");
-            patchBlacklist.Add("ProcessAssetBundle");
-            patchBlacklist.Add("GetMunition");
+            
+            redirectionBlacklist = new List<string>();
+            redirectionBlacklist.Add("get_Instance");
+            redirectionBlacklist.Add("get_IsInitialized");
+            redirectionBlacklist.Add("ProcessAssetBundle");
+            redirectionBlacklist.Add("GetMunition");
             // Any methods with more than 1 parameter are automatically blacklisted
             // Because going anywhere near the asynchronous methods is a recipe for disaster
 
@@ -33,9 +33,11 @@ namespace CommunityHighlander
 
             if (logMiscellaneous)
             {
+                Logger.LogInfo($"Harmony Patching:");
+
                 foreach (MethodBase method in harmony.GetPatchedMethods())
                 {
-                    Logger.LogInfo($"Harmony Patching {method.Name}()");
+                    Logger.LogInfo($" - {method.DeclaringType.Name}::{method.Name}()");
                 }
             }
 

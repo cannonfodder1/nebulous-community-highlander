@@ -14,11 +14,11 @@ using Ships;
 using Sound;
 using Utility;
 
-namespace CommunityHighlander
+namespace CommunityHighlander.Overrides
 {
-    public class CH_BundleManager : BundleManager
+    public class NCH_BundleManager : BundleManager
 	{
-		private static CH_BundleManager _instance = null;
+		private static NCH_BundleManager _instance = null;
 		private Dictionary<string, ModRecord> _hidden = new();
 
 		///////////////////////
@@ -60,24 +60,24 @@ namespace CommunityHighlander
 		/// MODIFIED METHODS ///
 		////////////////////////
 
-		public CH_BundleManager()
+		public NCH_BundleManager()
 		{
 		}
 
-		static CH_BundleManager()
+		static NCH_BundleManager()
 		{
 		}
 		
-		public new static CH_BundleManager Instance
+		public new static NCH_BundleManager Instance
 		{
 			get
 			{
-				if (CH_BundleManager._instance == null)
+				if (NCH_BundleManager._instance == null)
 				{
 					if (Plugin.logMiscellaneous) UnityEngine.Debug.Log("CREATING NEW BUNDLEMANAGER INSTANCE");
-					CH_BundleManager._instance = new CH_BundleManager();
+					NCH_BundleManager._instance = new NCH_BundleManager();
 				}
-				return CH_BundleManager._instance;
+				return NCH_BundleManager._instance;
 			}
 		}
 
@@ -85,14 +85,14 @@ namespace CommunityHighlander
 		{
 			get
 			{
-				return CH_BundleManager._instance != null;
+				return NCH_BundleManager._instance != null;
 			}
 		}
 
 		public static void WipeInstance()
 		{
 			if (Plugin.logMiscellaneous) UnityEngine.Debug.Log("WIPING EXISTING BUNDLEMANAGER INSTANCE");
-			CH_BundleManager._instance = null;
+			NCH_BundleManager._instance = null;
 		}
 
 		public new void ProcessAssetBundle(AssetBundle bundle, ModInfo fromMod)
