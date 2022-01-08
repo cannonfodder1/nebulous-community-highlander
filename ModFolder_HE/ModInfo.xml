@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <ModInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ModName>Highlander Example</ModName>
-  <ModDescription>Demonstrates how the highlander can be used to create new modules. Adds a smaller version of the particle beam and a fast-firing 120mm autocannon.</ModDescription>
+  <ModDescription>Demonstrates how the highlander can be used to create new components. Adds a smaller version of the particle beam turret that can fit on Class 3 hardpoints.</ModDescription>
   <ModVer>1.0</ModVer>
   <Assemblies>
     <string>HighlanderExample.dll</string>
   </Assemblies>
-  <GameVer>0.0.18</GameVer>
+  <GameVer>0.0.20</GameVer>
 </ModInfo>
