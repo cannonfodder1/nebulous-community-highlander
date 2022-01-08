@@ -19,12 +19,12 @@ namespace CommunityHighlander.Framework
 
         public struct ListenerRegisterReport
         {
-            public ListenerRegisterReport(ListenerRegisterResult result)
+            public ListenerRegisterReport(ListenerRegisterResult result, string modName)
             {
                 this.result = result;
-                modName = string.Empty;
-                minimum = string.Empty;
-                maximum = string.Empty;
+                this.modName = modName;
+                this.minimum = string.Empty;
+                this.maximum = string.Empty;
             }
 
             public ListenerRegisterReport(ListenerRegisterResult result, string modName, string minimum, string maximum)
@@ -101,7 +101,7 @@ namespace CommunityHighlander.Framework
             {
                 if (log) Debug.Log($"Event listener from {modRecord.Info.ModName} already exists");
 
-                return new ListenerRegisterReport(ListenerRegisterResult.ListenerAlreadyExists);
+                return new ListenerRegisterReport(ListenerRegisterResult.ListenerAlreadyExists, modRecord.Info.ModName);
             }
 
             string matchVersion = Utilities.GetHighlanderVersion();
@@ -122,8 +122,8 @@ namespace CommunityHighlander.Framework
                     {
                         EventListenerTemplate eventListener = (EventListenerTemplate)Activator.CreateInstance(listenerType, new object[] { modRecord });
 
-                        string listenerMinStr = eventListener.HighlanderVersionMinimum;
-                        string listenerMaxStr = eventListener.HighlanderVersionMaximum;
+                        string listenerMinStr = eventListener.HighlanderVersionMinimum();
+                        string listenerMaxStr = eventListener.HighlanderVersionMaximum();
 
                         if (log) Debug.Log($"{modRecord.Info.ModName} class {listenerType.Name} requires versions {listenerMinStr} through {listenerMaxStr}");
 
@@ -137,7 +137,7 @@ namespace CommunityHighlander.Framework
                         {
                             _eventListeners.Add(modRecord.Info.UniqueIdentifier, eventListener);
 
-                            return new ListenerRegisterReport(ListenerRegisterResult.ListenerRegistered);
+                            return new ListenerRegisterReport(ListenerRegisterResult.ListenerRegistered, modRecord.Info.ModName, listenerMinStr, listenerMaxStr);
                         }
                         else
                         {
@@ -151,7 +151,7 @@ namespace CommunityHighlander.Framework
                 }
             }
 
-            return new ListenerRegisterReport(ListenerRegisterResult.NoListenerFound);
+            return new ListenerRegisterReport(ListenerRegisterResult.NoListenerFound, modRecord.Info.ModName);
         }
 
         public void TriggerEventHook(string eventName, List<ulong> modIDs, bool log = false)
