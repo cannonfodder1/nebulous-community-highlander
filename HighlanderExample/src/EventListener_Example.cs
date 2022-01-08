@@ -26,22 +26,16 @@ namespace HighlanderExample
 
         // all event listeners must override this method, which tells the highlander
         // the oldest highlander version that this mod can operate on
-        public override string HighlanderVersionMinimum
+        public override string HighlanderVersionMinimum()
         {
-            get
-            {
-                return "1.2.0";
-            }
+            return "1.2.0";
         }
 
         // all event listeners must override this method, which tells the highlander
         // the latest highlander version that this mod can operate on
-        public override string HighlanderVersionMaximum
+        public override string HighlanderVersionMaximum()
         {
-            get
-            {
-                return "1.2.5";
-            }
+            return "1.2.5";
         }
 
         // this is an event hook method, which will be called by the highlander at certain points in the game

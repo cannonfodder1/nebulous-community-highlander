@@ -3,11 +3,10 @@ using Modding;
 
 namespace CommunityHighlander.Framework
 {
-    public class EventListenerTemplate
+    public abstract class EventListenerTemplate
     {
         private const string constructorError = "Event listeners cannot be instantiated without a mod record!";
-        private const string getVersionError = "Version getters should only be called in classes that inherit from the template!";
-        private const string eventMethodError = "Event methods should only be called in classes that inherit from the template!";
+        private const string eventHookError = "EventListenerTemplate's base event hook methods should not be called!";
 
         protected ModRecord modRecord;
 
@@ -21,30 +20,18 @@ namespace CommunityHighlander.Framework
             this.modRecord = modRecord;
         }
 
-        public virtual string HighlanderVersionMinimum
-        {
-            get
-            {
-                throw new NotImplementedException(getVersionError);
-            }
-        }
+        public abstract string HighlanderVersionMinimum();
 
-        public virtual string HighlanderVersionMaximum
-        {
-            get
-            {
-                throw new NotImplementedException(getVersionError);
-            }
-        }
+        public abstract string HighlanderVersionMaximum();
 
         public virtual void OnModLoadedAtStartup()
         {
-            throw new NotImplementedException(eventMethodError);
+            throw new NotImplementedException(eventHookError);
         }
 
         public virtual void OnModLoadedInLobby()
         {
-            throw new NotImplementedException(eventMethodError);
+            throw new NotImplementedException(eventHookError);
         }
     }
 }
