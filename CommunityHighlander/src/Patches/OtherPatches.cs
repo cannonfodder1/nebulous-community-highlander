@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using HarmonyLib;
@@ -7,8 +8,11 @@ using TMPro;
 
 using UI;
 using Ships;
+using Ships.Controls;
 using Modding;
 using FleetEditor;
+using Bundles;
+using Munitions;
 
 using CommunityHighlander.Overrides;
 using CommunityHighlander.Helpers;
@@ -28,7 +32,7 @@ namespace CommunityHighlander.Patches
         }
     }
 
-    // If items are hidden by mods, prevent displaying of them in the fleet editor
+    // If components are hidden by mods, prevent displaying of them in the fleet editor
     [HarmonyPatch(typeof(ComponentPalette), "CreateItem")]
     class Patch_CreateItem
     {
@@ -42,6 +46,73 @@ namespace CommunityHighlander.Patches
             {
                 return true;
             }
+        }
+    }
+
+    // If munitions are hidden by mods, prevent displaying of them in the fleet editor
+    [HarmonyPatch(typeof(SettingsMagazineLoadout), "AddMagazine")]
+    class Patch_AddMagazine
+    {
+        static bool Prefix(ref SettingsMagazineLoadout __instance)
+        {
+            Hull hull = (Hull)Utilities.GetPrivateValue(__instance, "_hull");
+            IMagazineProvider provider = (IMagazineProvider)Utilities.GetPrivateValue(__instance, "_provider");
+            GameObject ammoSelectPrefab = (GameObject)Utilities.GetPrivateValue(__instance, "_ammoSelectPrefab");
+
+            SettingsMagazineLoadout instance = __instance;
+
+            if (!(provider.UsedCapacity >= provider.MaxCapacity))
+            {
+                List<SelectableListItem> validAmmo = new List<SelectableListItem>();
+                using (IEnumerator<IMunition> enumerator = BundleManager.Instance.AllMunitions.GetEnumerator())
+                {
+                    while (enumerator.MoveNext())
+                    {
+                        IMunition ammo = enumerator.Current;
+
+                        if (provider.RestrictionCheck(ammo) && !NCH_BundleManager.Instance.IsItemHidden(ammo.SaveKey))
+                        {
+                            GameObject entryObj = UnityEngine.Object.Instantiate<GameObject>(ammoSelectPrefab);
+                            entryObj.name = ammo.MunitionName;
+                            DoubleTextListItem entry = entryObj.GetComponent<DoubleTextListItem>();
+                            entry.Set(ammo.MunitionName, ammo.GetDescription(), null, ammo);
+                            validAmmo.Add(entry);
+                            entry.SetDetailsCallback(delegate (out string title, out string subtitle, out Sprite image, out string details)
+                            {
+                                title = ammo.MunitionName;
+                                subtitle = string.Format("{0}pts. per {1} units", ammo.PointCost, ammo.PointDivision);
+                                image = ammo.DetailScreenshot;
+                                details = ammo.GetDetailText();
+                            });
+                        }
+                    }
+                }
+                validAmmo.Sort((SelectableListItem a, SelectableListItem b) => a.name.CompareTo(b.name));
+
+                ModalListSelectDetailed select = MenuController.Instance.OpenMenu<ModalListSelectDetailed>("List Select Detailed");
+                select.Set("Select Munition", "Confirm", validAmmo, delegate (SelectableListItem selected)
+                {
+                    IMagazine mag = provider.AddToMagazine(selected.Data as IMunition, 1U);
+                    if (mag != null)
+                    {
+                        Utilities.CallPrivateMethod(instance, "CreateMagazineEntry", new object[] { mag });
+                        instance.UpdateQuantities();
+                    }
+                }, null, 0, true);
+
+                if (provider.CanFeedExternally)
+                {
+                    List<IWeapon> weapons = hull.CollectComponents<IWeapon>();
+                    select.SetFilter("For Current Mounts Only", delegate (object data)
+                    {
+                        IMunition ammo = data as IMunition;
+                        bool flag3 = ammo != null;
+                        return flag3 && weapons.Any((IWeapon x) => x.NeedsExternalAmmoFeed && x.IsAmmoCompatible(ammo));
+                    });
+                }
+            }
+
+            return false;
         }
     }
 
