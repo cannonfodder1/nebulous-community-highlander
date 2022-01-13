@@ -3,13 +3,14 @@ using System.Reflection;
 using System.Collections.Generic;
 
 using UnityEngine;
+
 using Utility;
+using Munitions;
 
 namespace CommunityHighlander.Helpers
 {
-    // private helper methods for use by highlander only
-    // public helper methods are in NCH_Utilities
-    internal class Utilities
+    // useful methods for use by advanced modders and the NCH itself
+    public class Utilities
     {
         public static string GetHighlanderVersion()
         {
@@ -286,6 +287,79 @@ namespace CommunityHighlander.Helpers
             {
                 Debug.Log($"--- PRINTING COMPLETE ---");
             }
+        }
+
+        public static ValueType EditStructFields(object structure, Dictionary<string, object> values)
+        {
+            ValueType workaround = (ValueType)structure;
+            Type type = structure.GetType();
+
+            foreach (KeyValuePair<string, object> value in values)
+            {
+                FieldInfo field = type.GetField(value.Key, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                field.SetValue(workaround, value.Value);
+            }
+
+            return workaround;
+        }
+
+        public static GameObject CopyNebulousGameObject(GameObject donatorPrefab, string prefabName)
+        {
+            donatorPrefab.SetActive(false);
+
+            GameObject acceptorPrefab = UnityEngine.Object.Instantiate(donatorPrefab);
+            UnityEngine.Object.DontDestroyOnLoad(acceptorPrefab);
+            acceptorPrefab.name = prefabName;
+
+            return acceptorPrefab;
+        }
+
+        public static ScriptableObject CopyNebulousScriptableObject(ScriptableObject donatorObject, string objectName, List<string> exemptFields = null)
+        {
+            ScriptableObject acceptorObject = ScriptableObject.CreateInstance(donatorObject.GetType());
+
+            Utilities.CopyAllScriptValues(acceptorObject.GetType(), acceptorObject, donatorObject, null, exemptFields);
+
+            UnityEngine.Object.DontDestroyOnLoad(acceptorObject);
+            acceptorObject.name = objectName;
+
+            return acceptorObject;
+        }
+
+        public static void EditMunitionGradient(ScriptableObject munition, GradientColorKey[] colourKeys)
+        {
+            LightweightKineticShell munitionScript = (LightweightKineticShell)munition;
+
+            if (munitionScript is null) return;
+
+            StandbyVisualEffect visualEffect = munitionScript.TracerEffect;
+            ValueType wrapperObject = visualEffect;
+
+            Type type = visualEffect.GetType();
+            FieldInfo gradientField = type.GetField("_gradients", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            StandbyVisualEffect.GradientProperty[] gradients = (StandbyVisualEffect.GradientProperty[])gradientField.GetValue(wrapperObject);
+
+            if (gradients.Length < 1) return;
+
+            Gradient gradient = new()
+            {
+                colorKeys = colourKeys,
+                alphaKeys = gradients[0].Value.alphaKeys,
+                mode = gradients[0].Value.mode
+            };
+
+            StandbyVisualEffect.GradientProperty property = new()
+            {
+                Name = gradients[0].Name,
+                Value = gradient
+            };
+
+            gradientField.SetValue(wrapperObject, new StandbyVisualEffect.GradientProperty[] { property });
+            visualEffect = (StandbyVisualEffect)wrapperObject;
+
+            FieldInfo effectField = typeof(LightweightKineticShell).GetField("_tracerEffect", BindingFlags.NonPublic | BindingFlags.Instance);
+            effectField.SetValue(munition, visualEffect);
         }
     }
 }
