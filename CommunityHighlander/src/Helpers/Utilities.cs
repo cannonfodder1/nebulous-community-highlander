@@ -68,16 +68,20 @@ namespace CommunityHighlander.Helpers
             }
         }
 
-        public static object GetPrivateValue(object instance, string fieldName)
+        public static object GetPrivateValue(object instance, string fieldName, bool baseClass = false)
         {
             Type type = instance.GetType();
+            if (baseClass) type = type.BaseType;
+
             FieldInfo field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
             return field.GetValue(instance);
         }
 
-        public static void SetPrivateValue(object instance, string fieldName, object value)
+        public static void SetPrivateValue(object instance, string fieldName, object value, bool baseClass = false)
         {
             Type type = instance.GetType();
+            if (baseClass) type = type.BaseType;
+
             FieldInfo field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
             field.SetValue(instance, value);
         }
@@ -91,9 +95,11 @@ namespace CommunityHighlander.Helpers
             method.Invoke(instance, parameters);
         }
 
-        public static void ListPrivateMethods(object instance)
+        public static void ListPrivateMethods(object instance, bool baseClass = false)
         {
             Type type = instance.GetType();
+            if (baseClass) type = type.BaseType;
+
             MethodInfo[] methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance);
 
             Debug.Log("Methods of " + type.Name + ":");
@@ -104,9 +110,11 @@ namespace CommunityHighlander.Helpers
             }
         }
 
-        public static object GetPrivateProperty(object instance, string fieldName)
+        public static object GetPrivateProperty(object instance, string fieldName, bool baseClass = false)
         {
             Type type = instance.GetType();
+            if (baseClass) type = type.BaseType;
+
             PropertyInfo property = type.GetProperty(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
             return property.GetValue(instance);
         }
