@@ -4,6 +4,7 @@ using UnityEngine;
 using Modding;
 using Munitions;
 using Ships;
+using Bundles;
 
 using CommunityHighlander.Overrides;
 
@@ -97,7 +98,32 @@ namespace CommunityHighlander.Helpers
             return acceptorMunition;
         }
 
-        public static ResourceModifier CreateNebulousResourceModifier(string resourceName, int resourceAmount, bool perCubicMeter = false)
+        public static ResourceType CreateNebulousResourceType(
+            string resourceName,
+            string resourceUnit, 
+            ResourceType.Schedule resourceSchedule = ResourceType.Schedule.Ticked)
+        {
+            Dictionary<string, ResourceType> resourceDatabase = (Dictionary<string, ResourceType>)Utilities.GetPrivateValue(ResourceDefinitions.Instance, "_resources");
+
+            if (resourceDatabase.ContainsKey(resourceName))
+            {
+                return null;
+            }
+
+            ResourceType resource = new();
+            resource.Name = resourceName;
+            resource.Unit = resourceUnit;
+            resource.ScheduleMode = resourceSchedule;
+
+            resourceDatabase.Add(resource.Name, resource);
+
+            return resource;
+        }
+
+        public static ResourceModifier CreateNebulousResourceModifier(
+            string resourceName, 
+            int resourceAmount, 
+            bool perCubicMeter = false)
         {
             ResourceModifier resource = new();
 
