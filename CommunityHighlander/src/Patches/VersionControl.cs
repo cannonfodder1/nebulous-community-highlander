@@ -135,4 +135,26 @@ namespace CommunityHighlander.Patches
             }
         }
     }
+
+    [HarmonyPatch(typeof(SkirmishPlayer), "SetCommonPlayerData")]
+    class Patch_SetCommonPlayerData
+    {
+        static void Postfix(ref SkirmishPlayer __instance, PlayerHandoffData data)
+        {
+            if (Plugin.logMiscellaneous) Debug.Log("SkirmishPlayer::SetCommonPlayerData CALLED");
+
+            GameManager gameManager = GameManager.Instance;
+            if (__instance.IsBot || gameManager.IsSoloGame) return;
+
+            PortableNetworkManager networkManager = (PortableNetworkManager)Utilities.GetPrivateProperty(gameManager, "_netManager");
+            Lobby? lobby = (Lobby?)Utilities.GetPrivateValue(networkManager.LobbyInfo, "_lobby");
+            string lobbyVersion = lobby.Value.GetData("NCH_host");
+
+            if (lobbyVersion.Length > 0)
+            {
+                string finalText = Utilities.UndoLocalVersionTag(data.PlayerName, lobbyVersion);
+                __instance.Network_playerName = finalText;
+            }
+        }
+    }
 }

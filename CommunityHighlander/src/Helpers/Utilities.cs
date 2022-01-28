@@ -56,6 +56,28 @@ namespace CommunityHighlander.Helpers
             return finalText;
         }
 
+        public static string UndoLocalVersionTag(string playerName, string remoteVersion)
+        {
+            string versionTag;
+            string localVersion = GetHighlanderVersion();
+
+            if (!playerName.Contains("[NCH v"))
+            {
+                return playerName;
+            }
+
+            if (remoteVersion == localVersion)
+            {
+                versionTag = "<color=" + GameColors.GreenTextColor + ">[NCH v" + localVersion + "]</color> ";
+            }
+            else
+            {
+                versionTag = "<color=" + GameColors.YellowTextColor + ">[NCH v" + localVersion + "]</color> ";
+            }
+
+            return playerName.Substring(versionTag.Length);
+        }
+
         public static string FormatMissingVersionTag(string playerName)
         {
             if (!playerName.Contains("[NCH v"))
