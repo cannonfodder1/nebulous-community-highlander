@@ -58,7 +58,7 @@ namespace CommunityHighlander.Patches
                 return;
             }
 
-            string version = lobbyData.Value.GetData("NCH_version");
+            string version = lobbyData.Value.GetData("NCH_host");
 
             if (Plugin.logMiscellaneous) Debug.Log($"{lobby.Name} version is {((version != null && version.Length > 0) ? version : "NULL")}");
 
