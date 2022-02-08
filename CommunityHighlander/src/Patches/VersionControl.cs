@@ -19,6 +19,11 @@ namespace CommunityHighlander.Patches
     {
         static void Postfix(ref PortableNetworkManager __instance)
         {
+            if (!Plugin.modEnabled)
+            {
+                return;
+            }
+
             if (Plugin.logMiscellaneous) Debug.Log("PortableNetworkManager::SetLobbyName CALLED");
 
             if (__instance == null)
@@ -43,6 +48,11 @@ namespace CommunityHighlander.Patches
     {
         static void Postfix(ref MPMatchEntry __instance, ref SteamLobby lobby)
         {
+            if (!Plugin.modEnabled)
+            {
+                return;
+            }
+
             if (Plugin.logMiscellaneous) Debug.Log("MPMatchEntry::Set CALLED");
 
             if (__instance == null)
@@ -72,6 +82,11 @@ namespace CommunityHighlander.Patches
     {
         static void Postfix(ref SkirmishLobbyMenu __instance, ref IPlayer player)
         {
+            if (!Plugin.modEnabled)
+            {
+                return;
+            }
+
             if (Plugin.logMiscellaneous) Debug.Log("SkirmishLobbyMenu::HandlePlayerAdded CALLED");
 
             GameManager gameManager = GameManager.Instance;
@@ -97,6 +112,11 @@ namespace CommunityHighlander.Patches
     {
         static void Postfix(ref LobbyPlayer __instance, ref string oldName, ref string newName)
         {
+            if (!Plugin.modEnabled)
+            {
+                return;
+            }
+
             if (Plugin.logMiscellaneous) Debug.Log("LobbyPlayer::SyncPlayerNameChangedInternal CALLED");
 
             GameManager gameManager = GameManager.Instance;
@@ -119,6 +139,11 @@ namespace CommunityHighlander.Patches
     {
         static void Postfix(ref SkirmishLobbyPlayer __instance)
         {
+            if (!Plugin.modEnabled)
+            {
+                return;
+            }
+
             if (Plugin.logMiscellaneous) Debug.Log("LobbyPlayer::OnStartAuthority CALLED");
 
             GameManager gameManager = GameManager.Instance;
@@ -141,6 +166,11 @@ namespace CommunityHighlander.Patches
     {
         static void Postfix(ref SkirmishPlayer __instance, PlayerHandoffData data)
         {
+            if (!Plugin.modEnabled)
+            {
+                return;
+            }
+
             if (Plugin.logMiscellaneous) Debug.Log("SkirmishPlayer::SetCommonPlayerData CALLED");
 
             GameManager gameManager = GameManager.Instance;

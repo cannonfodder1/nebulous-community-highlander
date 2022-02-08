@@ -15,6 +15,7 @@ namespace CommunityHighlander
         public static bool logOperations = false;
 
         public static List<string> redirectionBlacklist;
+        public static bool modEnabled;
 
         private void Awake()
         {
@@ -42,6 +43,8 @@ namespace CommunityHighlander
             }
 
             // Note: before LoadAllBundlesAsync finishes running, there can be no instantiation of BundleManager under any circumstances
+
+            modEnabled = false;
         }
     }
 }

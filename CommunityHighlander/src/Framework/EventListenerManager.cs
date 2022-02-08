@@ -156,6 +156,12 @@ namespace CommunityHighlander.Framework
 
         public void TriggerEventHook(string eventName, List<ulong> modIDs, bool log = false)
         {
+            if (!Plugin.modEnabled)
+            {
+                if (log) Debug.Log($"Event hook {eventName} not activated - highlander mod disabled");
+                return;
+            }
+
             if (log) Debug.Log($"Event hook {eventName} activating within {modIDs.Count} mods");
 
             foreach (ulong modID in modIDs)

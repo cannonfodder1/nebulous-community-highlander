@@ -21,6 +21,16 @@ namespace CommunityHighlander.Patches
 
             foreach (ModRecord modRecord in report.Loaded)
             {
+                if (Plugin.logMiscellaneous) Debug.Log(modRecord.Info.ModName + " ::: " + modRecord.Info.UniqueIdentifier);
+
+                if (modRecord.Info.UniqueIdentifier == 2663519024)
+                {
+                    Plugin.modEnabled = true;
+                }
+            }
+
+            foreach (ModRecord modRecord in report.Loaded)
+            {
                 EventListenerManager.ListenerRegisterReport regReport = EventListenerManager.Instance.RegisterEventListener(modRecord, Plugin.logEventHooks);
                 
                 if (Plugin.logEventHooks) Debug.Log($"Prefix {regReport.modName}: {regReport.minimum}/{regReport.maximum} = {regReport.result}");
@@ -40,6 +50,19 @@ namespace CommunityHighlander.Patches
 
             foreach (EventListenerManager.ListenerRegisterReport report in __state)
             {
+                if (!Plugin.modEnabled)
+                {
+                    ModalConfirm warning = MenuController.Instance.OpenMenu<ModalConfirm>("Confirm");
+                    warning.Set(
+                        $"{report.modName} requires the highlander to be active. This mod may work incorrectly or simply do nothing. " +
+                        $"The highlander is installed (or you wouldn't be able to see this message) but must be enabled using the in-game mod manager.",
+                        "Understood",
+                        false, null, null
+                    );
+
+                    continue;
+                }
+
                 if (Plugin.logEventHooks) Debug.Log($"Postfix {report.modName}: {report.minimum}/{report.maximum} = {report.result}");
 
                 if (report.result == EventListenerManager.ListenerRegisterResult.VersionMismatch)
@@ -68,6 +91,18 @@ namespace CommunityHighlander.Patches
             if (____downloadCoroutine == null && ____missingMods.Count == 0 && ____neededMods.Length > 0)
             {
                 List<ulong> modIDs = new();
+
+                foreach (ulong modID in ____neededMods)
+                {
+                    ModRecord modRecord = ModDatabase.Instance.GetModByID(modID);
+
+                    if (Plugin.logMiscellaneous) Debug.Log(modRecord.Info.ModName + " ::: " + modRecord.Info.UniqueIdentifier);
+
+                    if (modRecord.Info.UniqueIdentifier == 2663519024)
+                    {
+                        Plugin.modEnabled = true;
+                    }
+                }
 
                 foreach (ulong modID in ____neededMods)
                 {
