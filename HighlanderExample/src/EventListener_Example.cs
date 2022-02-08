@@ -72,18 +72,31 @@ namespace HighlanderExample
             string networkID = "f2w3h894097gfwq8ieaq";
 
             // you can use value changes to specify how you want your new module to differ from the one you're copying
-            Dictionary<String, object> valueChanges = new();
-
             // some research of the game's Nebulous.dll with dnSpy may be required to find the correct variable names and types
+            Dictionary<String, object> valueChanges = new();
             valueChanges.Add("_size", new Vector3Int(3, 1, 5));
             valueChanges.Add("_pointCost", 50);
-            valueChanges.Add("_cooldownTime", 80);
+            valueChanges.Add("_crewRequired", 5);
+            valueChanges.Add("_burstDuration", 5.0f);
+            valueChanges.Add("_cooldownTime", 40);
+            valueChanges.Add("_traverseRate", 10.0f);
+            valueChanges.Add("_elevationRate", 15.0f);
 
             // with this value change, we use one of the highlander's helper methods to construct a replacement value
             valueChanges.Add("ResourcesRequired", new ResourceModifier[] { Workflows.CreateNebulousResourceModifier("Power", 1750) });
 
             // this one is special, the highlander will change the part's visual size if you make a value change with "CH_ScaleLODs"
             valueChanges.Add("CH_ScaleLODs", new Vector3(0.5f, 0.5f, 0.5f));
+
+            // these aren't anything special, but I placed them away from the others because they don't affect the weapon's functionality
+            valueChanges.Add("_flavorText", "");
+            valueChanges.Add("_shortDescription", "Class 3 Particle Beam");
+            valueChanges.Add("_longDescription",
+                "The Mk601 Particle Beam is the lighter counterpart to the Mk610 - a weapon designed for point-blank range, " +
+                "inheriting all the strengths and weaknesses of it's bigger brother. There are a few differences; the Mk601 " +
+                "cannot sustain a beam burst for as long as the larger turret, but the smaller housing allows for much " +
+                "faster rotation and elevation speeds."
+            );
 
             // this is a Unity log statement, it prints info to your player.log file to make debugging easier
             Debug.Log($"Creating {partName}");
