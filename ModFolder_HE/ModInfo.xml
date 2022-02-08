@@ -6,5 +6,5 @@
   <Assemblies>
     <string>HighlanderExample.dll</string>
   </Assemblies>
-  <GameVer>0.0.20</GameVer>
+  <GameVer>0.1.0</GameVer>
 </ModInfo>

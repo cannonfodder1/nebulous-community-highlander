@@ -28,7 +28,7 @@ namespace HighlanderExample
         // the oldest highlander version that this mod can operate on
         public override string HighlanderVersionMinimum()
         {
-            return "1.2.0";
+            return "1.2.1";
         }
 
         // all event listeners must override this method, which tells the highlander
@@ -80,7 +80,7 @@ namespace HighlanderExample
             valueChanges.Add("_cooldownTime", 80);
 
             // with this value change, we use one of the highlander's helper methods to construct a replacement value
-            valueChanges.Add("ResourcesRequired", new ResourceModifier[] { Helpers.CreateNebulousResourceModifier("Power", 1750) });
+            valueChanges.Add("ResourcesRequired", new ResourceModifier[] { Workflows.CreateNebulousResourceModifier("Power", 1750) });
 
             // this one is special, the highlander will change the part's visual size if you make a value change with "CH_ScaleLODs"
             valueChanges.Add("CH_ScaleLODs", new Vector3(0.5f, 0.5f, 0.5f));
@@ -89,7 +89,7 @@ namespace HighlanderExample
             Debug.Log($"Creating {partName}");
 
             // finally, we call the Highlander's helper method with the information we constructed above
-            Helpers.CreateNebulousHullPart(
+            Workflows.CreateNebulousHullPart(
                 modRecord,
                 networkID,
                 partName,
